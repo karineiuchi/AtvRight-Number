@@ -6,108 +6,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
-    <title>calculadora</title>
+    <title>RightNumber</title>
 </head>
 
 <body>
-    <section>
-        <h3><span id="preco_diaria">R$620 </span> noite</h3>
-        <form class="formulario">
-            <div class="datas">
-                <div class="campo">
-                    <label for="checkin">CHECK-IN</label>
-                    <input type="date" id="checkin">
-                </div>
-                <div class="campo">
-                    <label for="checkout">CHECKOUT</label>
-                    <input type="date" id="checkout">
-                </div>
-            </div>
-            <div>
-                <label for="hospedes">HÓSPEDES</label>
-                <select id="hospedes">
-                    <option value="1">1 hóspedes</option>
-                    <option value="2">2 hóspedes</option>
-                    <option value="3">3 hóspedes</option>
-                    <option value="4">4 hóspedes</option>
-                </select>
-            </div>
-        </form>
-        <button type="button" id="reserver">Reservar</button>
-        <div>
-            <p>
-                Você ainda não será cobrado</p>
-            <ul>
-                <li>
-                    <span id="subtotal">R$620,00 x 5 noites</span> <span id="valor_sub">R$3.100</span>
-                </li>
-                <li>
-                    <span>Taxa de limpeza</span> <span id="taxa_limpeza">R$120</span>
-                </li>
-                <li>
-                    <span>Taxa de serviço Airbnb</span> <span id="taxa_servico">R$460</span>
-                </li>
-                <hr>
-                <li>
-                    <span>Total sem impostos</span> <span id="total">3.688</span>
-                </li>
-            </ul>
-        </div>
+
+    <section class="contador">
+        <h1 id="cronometro">00:30</h1>
+        <p>Escolha um Número entre 0 e 9</p>
+        <h2>?</h2>
+        <p>O número é menor</p>
+        <ul>
+            <li><button>0</button></li>
+            <li><button>1</button></li>
+            <li><button>2</button></li>
+            <li><button>3</button></li>
+            <li><button>4</button></li>
+            <li><button>5</button></li>
+            <li><button>6</button></li>
+            <li><button>7</button></li>
+            <li><button>8</button></li>
+            <li><button>9</button></li>
+        </ul>
     </section>
     <script>
-        const checkin = document.getElementById('checkin');
-        const checkout = document.getElementById('checkout');
-        const hospedes = document.getElementById('hospedes');
+        let numeroSecreto = Math.floor(Math.random() * 100) + 1;
+        let tempo = 30;
+        let intervalo = setInterval(atualizarTempo, 1000);
+        let jogoAtivo = true;
 
-        function calcular() {
-            const data_saida = new Date(checkout.value);
-            const data_entrada = new Date(checkin.value);
+        function atualizarTempo() {
+            const cronometro = document.getElementById('cronometro');
+            cronometro.textContent = tempo;
+            tempo--;
 
-            if (isNaN(data_saida) || isNaN(data_entrada) || data_saida <= data_entrada) {
-                console.log('Datas inválidas ou não selecionadas corretamente');
+            if (tempo < 0) {
+                clearInterval(intervalo);
+                jogoAtivo = false;
+                document.getElementById('resultado').textContent = `⏰ Tempo esgotado! Você perdeu. O número era ${numeroSecreto}.`;
+            }
+        }
+
+        function verificar() {
+            if (!jogoAtivo) return;
+
+            const entrada = document.getElementById('entrada').value;
+            const resultado = document.getElementById('resultado');
+            const chute = Number(entrada);
+
+            if (isNaN(chute) || chute < 1 || chute > 100) {
+                resultado.textContent = "Digite um número válido entre 1 e 100.";
                 return;
             }
 
-            const qtd_diarias = (data_saida - data_entrada) / 86400000;
-            console.log(`Quantidade de diárias: ${qtd_diarias}`);
-
-            const preco_diaria = parseFloat(document.getElementById('preco_diaria').innerText.substring(2));
-            const qtd_hospedes = parseInt(hospedes.value);
-
-            console.log(`Preço base da diária: R$${preco_diaria}`);
-            console.log(`Quantidade de hóspedes: ${qtd_hospedes}`);
-
-            const preco_diaria_por_hospedes = preco_diaria * qtd_hospedes;
-            console.log(`Preço da diária considerando hóspedes: R$${preco_diaria_por_hospedes}`);
-
-            const subtotal = document.getElementById('subtotal');
-            subtotal.innerHTML = `R$${preco_diaria_por_hospedes} x ${qtd_diarias} noites`;
-
-            const valor_diarias = preco_diaria_por_hospedes * qtd_diarias;
-            console.log(`Valor das diárias: R$${valor_diarias}`);
-
-            document.getElementById('valor_sub').innerHTML = "R$" + valor_diarias;
-
-            const valor_taxa_servico = 0.15 * valor_diarias;
-            console.log(`Taxa de serviço (15%): R$${valor_taxa_servico}`);
-
-            document.getElementById('taxa_servico').innerHTML = "R$" + valor_taxa_servico;
-
-            const valor_taxa_limpeza = parseFloat(document.getElementById('taxa_limpeza').innerText.substring(2));
-            console.log(`Taxa de limpeza: R$${valor_taxa_limpeza}`);
-
-            const total = valor_diarias + valor_taxa_servico + valor_taxa_limpeza;
-            console.log(`TOTAL SEM IMPOSTOS: R$${total}`);
-            console.log('----------------------------');
-
-            document.getElementById('total').innerHTML = "R$" + total;
+            if (chute === numeroSecreto) {
+                resultado.textContent = `🎉 Parabéns! Você acertou: ${chute} é o número secreto!`;
+                jogoAtivo = false;
+                clearInterval(intervalo);
+            } else if (chute < numeroSecreto) {
+                resultado.textContent = `Errado! ${chute} é menor que o número secreto.`;
+            } else {
+                resultado.textContent = `Errado! ${chute} é maior que o número secreto.`;
+            }
         }
-        checkin.addEventListener('change', calcular);
-        checkout.addEventListener('change', calcular);
-        hospedes.addEventListener('change', calcular);
+
+        function reiniciar() {
+            numeroSecreto = Math.floor(Math.random() * 100) + 1;
+            tempo = 30;
+            jogoAtivo = true;
+            document.getElementById('resultado').textContent = '';
+            document.getElementById('entrada').value = '';
+            document.getElementById('cronometro').textContent = tempo;
+            clearInterval(intervalo);
+            intervalo = setInterval(atualizarTempo, 1000);
+        }
     </script>
-
-
 </body>
-
-</html>
